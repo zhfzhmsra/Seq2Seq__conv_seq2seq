@@ -14,10 +14,9 @@ export TEST_TARGETS=${DATA_PATH}/tst2013.en
 export TRAIN_STEPS=1000000
 
 
-export MODEL_DIR=${TMPDIR:-/tmp}/nmt_conv_seq2seq
+export MODEL_DIR=/home/deeprec/fuz/codes/Seq2Seq__conv_seq2seq/nmt_conv_seq2seq
 mkdir -p $MODEL_DIR
 
-'''
 python -m bin.train \
   --config_paths="
       ./example_configs/conv_seq2seq.yml,
@@ -45,48 +44,7 @@ python -m bin.train \
   --train_steps $TRAIN_STEPS \
   --output_dir $MODEL_DIR
 
-'''
 
-
-export PRED_DIR=${MODEL_DIR}/pred
-mkdir -p ${PRED_DIR}
-'''
-###with greedy search
-python -m bin.infer \
-  --tasks "
-    - class: DecodeText" \
-  --model_dir $MODEL_DIR \
-  --model_params "
-    inference.beam_search.beam_width: 1 
-    decoder.class: seq2seq.decoders.ConvDecoderFairseq" \
-  --input_pipeline "
-    class: ParallelTextInputPipelineFairseq
-    params:
-      source_files:
-        - $TEST_SOURCES" \
-  > ${PRED_DIR}/predictions.txt
-
-'''
-###with beam search
-python -m bin.infer \
-  --tasks "
-    - class: DecodeText
-    - class: DumpBeams
-      params:
-        file: ${PRED_DIR}/beams.npz" \
-  --model_dir $MODEL_DIR \
-  --model_params "
-    inference.beam_search.beam_width: 5 
-    decoder.class: seq2seq.decoders.ConvDecoderFairseqBS" \
-  --input_pipeline "
-    class: ParallelTextInputPipelineFairseq
-    params:
-      source_files:
-        - $TEST_SOURCES" \
-  > ${PRED_DIR}/predictions.txt
-
-
-./bin/tools/multi-bleu.perl ${TEST_TARGETS} < ${PRED_DIR}/predictions.txt
 
 
 

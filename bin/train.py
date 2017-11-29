@@ -40,7 +40,10 @@ from seq2seq.metrics import metric_specs
 from seq2seq.training import hooks
 from seq2seq.training import utils as training_utils
 
-tf.flags.DEFINE_string("config_paths", "",
+tf.flags.DEFINE_string("config_paths", """
+      ./example_configs/conv_seq2seq.yml,
+      ./example_configs/train_seq2seq.yml,
+      ./example_configs/text_metrics_bpe.yml""",
                        """Path to a YAML configuration files defining FLAG
                        values. Multiple files can be separated by commas.
                        Files are merged recursively. Setting a key in these
@@ -56,14 +59,28 @@ tf.flags.DEFINE_string("model", "",
                        """Name of the model class.
                        Can be either a fully-qualified name, or the name
                        of a class defined in `seq2seq.models`.""")
-tf.flags.DEFINE_string("model_params", "{}",
+tf.flags.DEFINE_string("model_params", """
+      vocab_source: /home/deeprec/fuz/codes/nmt/data/vocab.vi
+      vocab_target: /home/deeprec/fuz/codes/nmt/data/vocab.en""",
                        """YAML configuration string for the model
                        parameters.""")
 
-tf.flags.DEFINE_string("input_pipeline_train", "{}",
+tf.flags.DEFINE_string("input_pipeline_train", """
+    class: ParallelTextInputPipelineFairseq
+    params:
+      source_files:
+        - /home/deeprec/fuz/codes/nmt/data/train.vi
+      target_files:
+        - /home/deeprec/fuz/codes/nmt/data/train.en""",
                        """YAML configuration string for the training
                        data input pipeline.""")
-tf.flags.DEFINE_string("input_pipeline_dev", "{}",
+tf.flags.DEFINE_string("input_pipeline_dev", """
+    class: ParallelTextInputPipelineFairseq
+    params:
+       source_files:
+        - /home/deeprec/fuz/codes/nmt/data/tst2012.vi
+       target_files:
+        - /home/deeprec/fuz/codes/nmt/data/tst2012.en""",
                        """YAML configuration string for the development
                        data input pipeline.""")
 
@@ -74,7 +91,7 @@ tf.flags.DEFINE_string("buckets", None,
                        <10, 10-20, 20-30, >30. None disabled bucketing. """)
 tf.flags.DEFINE_integer("batch_size", 16,
                         """Batch size used for training and evaluation.""")
-tf.flags.DEFINE_string("output_dir", None,
+tf.flags.DEFINE_string("output_dir", "/home/deeprec/fuz/codes/Seq2Seq__conv_seq2seq/nmt_conv_seq2seq",
                        """The directory to write model checkpoints and summaries
                        to. If None, a local temporary directory is created.""")
 
@@ -82,7 +99,7 @@ tf.flags.DEFINE_string("output_dir", None,
 tf.flags.DEFINE_string("schedule", "continuous_train_and_eval",
                        """Estimator function to call, defaults to
                        continuous_train_and_eval for local run""")
-tf.flags.DEFINE_integer("train_steps", None,
+tf.flags.DEFINE_integer("train_steps", 50000,
                         """Maximum number of training steps to run.
                          If None, train forever.""")
 tf.flags.DEFINE_integer("eval_every_n_steps", 1000,
